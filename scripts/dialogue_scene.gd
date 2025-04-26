@@ -5,27 +5,27 @@ var current_index = 0
 
 var test_dialogue = [
 	{
-		"character": "安迪",
-		"text": "由妳來照顧他吧！",
+		"character": "莉莉",
+		"text": "哈囉～好久不見！你也來公園散步嗎？",
 		"character_image": "res://resources/characters/girl-a-normal.png",
 		"background": "res://resources/backgrounds/a-park.png"
 	},
 	{
-		"character": "莉莉",
-		"text": "這個責任很重大...",
-		"character_image": "res://resources/characters/girl-a-sad.png",
+		"character": "我",
+		"text": "嗨，好久不見⋯⋯",
+		"character_image": "res://resources/characters/girl-a-normal.png",
 		"background": "res://resources/backgrounds/a-park.png",
 		"choices": [
 			{
-				"text": "我會盡力的！",
-				"next_dialogue": "accept_route"
+				"text": "我來溜狗啦",
+				"next_dialogue": "dog_route"
 			},
 			{
-				"text": "我需要考慮一下...",
-				"next_dialogue": "hesitate_route"
+				"text": "對啊，最近心情不好，來散散心",
+				"next_dialogue": "feeling_route"
 			},
 			{
-				"text": "這太困難了...",
+				"text": "對啊，我想說可能會遇見你。",
 				"next_dialogue": "reject_route"
 			}
 		]
@@ -33,45 +33,39 @@ var test_dialogue = [
 ]
 
 var dialogue_routes = {
-	"accept_route": [
+	"dog_route": [
 		{
 			"character": "莉莉",
-			"text": "好！我一定會好好照顧他的！",
+			"text": "哇！好可愛的狗狗！你養多久了啊？",
 			"character_image": "res://resources/characters/girl-a-surprise.png",
 			"background": "res://resources/backgrounds/a-park.png"
 		},
 		{
-			"character": "安迪",
-			"text": "我相信你一定做得到。",
-			"character_image": "res://resources/characters/girl-a-normal.png",
+			"character": "我",
+			"text": "其實才養了兩個月而已。",
+			"character_image": "res://resources/characters/girl-a-surprise.png",
 			"background": "res://resources/backgrounds/a-park.png"
 		}
 	],
-	"hesitate_route": [
+	"feeling_route": [
 		{
 			"character": "莉莉",
-			"text": "這確實需要好好思考...",
-			"character_image": "res://resources/characters/girl-a-sad.png",
+			"text": "你最近怎麼嗎？還好嗎？",
+			"character_image": "res://resources/characters/girl-a-surprise.png",
 			"background": "res://resources/backgrounds/a-park.png"
 		},
 		{
-			"character": "安迪",
-			"text": "沒關係，慢慢考慮。",
-			"character_image": "res://resources/characters/girl-a-normal.png",
+			"character": "我",
+			"text": "喔，沒什麼啦，只是最近比較忙，所以有點累。",
+			"character_image": "res://resources/characters/girl-a-surprise.png",
 			"background": "res://resources/backgrounds/a-park.png"
 		}
 	],
 	"reject_route": [
 		{
 			"character": "莉莉",
-			"text": "對不起，我可能無法勝任...",
-			"character_image": "res://resources/characters/girl-a-sad.png",
-			"background": "res://resources/backgrounds/a-park.png"
-		},
-		{
-			"character": "安迪",
-			"text": "我明白了，這確實是個艱難的決定。",
-			"character_image": "res://resources/characters/girl-a-normal.png",
+			"text": "⋯⋯你怎麼知道我會在公園，你是變態嗎？",
+			"character_image": "res://resources/characters/girl-a-angry.png",
 			"background": "res://resources/backgrounds/a-park.png"
 		}
 	]

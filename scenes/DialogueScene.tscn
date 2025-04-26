@@ -1,6 +1,9 @@
-[gd_scene load_steps=2 format=3 uid="uid://b46ikt2qcjsu8"]
+[gd_scene load_steps=3 format=3 uid="uid://b46ikt2qcjsu8"]
 
 [ext_resource type="Script" uid="uid://btx7ypdfnjs4k" path="res://scripts/dialogue_scene.gd" id="1_c4h3t"]
+
+[sub_resource type="Theme" id="Theme_c4h3t"]
+default_font_size = 35
 
 [node name="root" type="CanvasLayer"]
 script = ExtResource("1_c4h3t")
@@ -12,6 +15,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = SubResource("Theme_c4h3t")
 
 [node name="Background" type="TextureRect" parent="UIRoot"]
 layout_mode = 1
@@ -51,10 +55,11 @@ grow_vertical = 0
 [node name="CharacterName" type="Label" parent="UIRoot/DialoguePanel"]
 layout_mode = 1
 offset_left = 40.0
-offset_top = 20.0
+offset_top = 10.0
 offset_right = 300.0
-offset_bottom = 60.0
-theme_override_font_sizes/font_size = 24
+offset_bottom = 65.0
+theme_override_font_sizes/font_size = 40
+text = "dssdssds"
 
 [node name="DialogueText" type="RichTextLabel" parent="UIRoot/DialoguePanel"]
 layout_mode = 1
@@ -67,7 +72,8 @@ offset_right = -40.0
 offset_bottom = -20.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_font_sizes/normal_font_size = 20
+theme_override_font_sizes/normal_font_size = 35
+text = "dssdsds"
 
 [node name="ChoicePanel" type="Control" parent="UIRoot"]
 visible = false
