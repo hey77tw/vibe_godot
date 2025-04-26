@@ -80,15 +80,31 @@ var dialogue_routes = {
 		},
 		{
 			"is_ending": true,
-			"ending_text": "BAD END\n你被當成了跟蹤狂...",
+			"ending_text": "壞結局：你被當成了跟蹤狂...",
 			"background": "res://resources/endings/ending-fail.png"
 		}
 	]
 }
 
 func _ready():
+	# 連接重新開始按鈕的信號
+	$UIRoot/RestartButton.pressed.connect(_on_restart_button_pressed)
+	restart_game()
+
+func restart_game():
+	# 重置遊戲狀態
 	current_dialogue = test_dialogue
 	current_index = 0
+	
+	# 重置UI
+	$UIRoot/DialoguePanel.visible = true
+	$UIRoot/DialoguePanel.modulate.a = 1
+	$UIRoot/DialoguePanel/CharacterName.visible = true
+	$UIRoot/CharacterSprite.visible = true
+	$UIRoot/ChoicePanel.visible = false
+	$UIRoot/RestartButton.visible = false
+	
+	# 顯示初始對話
 	show_current_dialogue()
 
 func show_current_dialogue():
@@ -140,6 +156,12 @@ func show_ending(ending_data):
 		var texture = load(ending_data["background"])
 		if texture:
 			$UIRoot/Background.texture = texture
+	
+	# 顯示重新開始按鈕
+	$UIRoot/RestartButton.visible = true
+
+func _on_restart_button_pressed():
+	restart_game()
 
 func show_choices(choices):
 	# 清除現有的選項按鈕
