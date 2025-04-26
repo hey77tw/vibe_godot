@@ -45,6 +45,11 @@ var dialogue_routes = {
 			"text": "其實才養了兩個月而已。",
 			"character_image": "res://resources/characters/girl-a-surprise.png",
 			"background": "res://resources/backgrounds/a-park.png"
+		},
+		{
+			"is_ending": true,
+			"ending_text": "狗狗結局：你們一起散步，成為了好朋友。",
+			"background": "res://resources/endings/ending-sunshine.png"
 		}
 	],
 	"feeling_route": [
@@ -59,6 +64,11 @@ var dialogue_routes = {
 			"text": "喔，沒什麼啦，只是最近比較忙，所以有點累。",
 			"character_image": "res://resources/characters/girl-a-surprise.png",
 			"background": "res://resources/backgrounds/a-park.png"
+		},
+		{
+			"is_ending": true,
+			"ending_text": "傾訴結局：你們聊了很久，心情好多了。",
+			"background": "res://resources/endings/ending-home.png"
 		}
 	],
 	"reject_route": [
@@ -67,6 +77,11 @@ var dialogue_routes = {
 			"text": "⋯⋯你怎麼知道我會在公園，你是變態嗎？",
 			"character_image": "res://resources/characters/girl-a-angry.png",
 			"background": "res://resources/backgrounds/a-park.png"
+		},
+		{
+			"is_ending": true,
+			"ending_text": "BAD END\n你被當成了跟蹤狂...",
+			"background": "res://resources/endings/ending-fail.png"
 		}
 	]
 }
@@ -81,6 +96,12 @@ func show_current_dialogue():
 		return
 		
 	var dialogue = current_dialogue[current_index]
+	
+	# 檢查是否為結局
+	if dialogue.has("is_ending"):
+		show_ending(dialogue)
+		return
+		
 	$UIRoot/DialoguePanel/CharacterName.text = dialogue["character"]
 	$UIRoot/DialoguePanel/DialogueText.text = dialogue["text"]
 	
@@ -99,6 +120,26 @@ func show_current_dialogue():
 	# 如果有選項
 	if dialogue.has("choices"):
 		show_choices(dialogue["choices"])
+
+func show_ending(ending_data):
+	# 隱藏角色
+	$UIRoot/CharacterSprite.visible = false
+	
+	# 隱藏角色名稱
+	$UIRoot/DialoguePanel/CharacterName.visible = false
+	
+	# 設置並顯示結局文字
+	$UIRoot/DialoguePanel/DialogueText.text = ending_data["ending_text"]
+	$UIRoot/DialoguePanel/DialogueText.visible = true
+	
+	# 保持對話框面板可見，但調整其透明度
+	$UIRoot/DialoguePanel.modulate.a = 0.8
+	
+	# 更新背景
+	if ending_data.has("background"):
+		var texture = load(ending_data["background"])
+		if texture:
+			$UIRoot/Background.texture = texture
 
 func show_choices(choices):
 	# 清除現有的選項按鈕
