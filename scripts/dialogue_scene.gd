@@ -4,6 +4,7 @@ var current_dialogue = []
 var current_index = 0
 var dialogue_data = {}
 var dialogue_routes = {}
+var endings = {}
 
 func load_dialogue_data():
 	var file = FileAccess.open("res://dialogue_data.json", FileAccess.READ)
@@ -14,6 +15,7 @@ func load_dialogue_data():
 		if error == OK:
 			dialogue_data = json.data
 			dialogue_routes = dialogue_data["routes"]
+			endings = dialogue_data["endings"]
 		else:
 			print("JSON 解析錯誤：", json.get_error_message())
 	else:
@@ -119,8 +121,11 @@ func _on_choice_selected(choice):
 	# 隱藏選項面板
 	$UIRoot/ChoicePanel.visible = false
 	
+	# 檢查是否為結局
+	if choice.has("next_ending") and endings.has(choice["next_ending"]):
+		show_ending(endings[choice["next_ending"]])
 	# 切換到選擇的對話路線
-	if choice.has("next_dialogue") and dialogue_routes.has(choice["next_dialogue"]):
+	elif choice.has("next_dialogue") and dialogue_routes.has(choice["next_dialogue"]):
 		current_dialogue = dialogue_routes[choice["next_dialogue"]]
 		current_index = 0
 		show_current_dialogue()

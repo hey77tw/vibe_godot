@@ -79,7 +79,7 @@
                 "choices": [
                     {
                         "text": "好啊，一起走吧！",
-                        "next_dialogue": "dog_happy_end"
+                        "next_ending": "dog_happy_end"
                     }
                 ]
             }
@@ -96,13 +96,6 @@
                         "next_dialogue": "feeling_route_2"
                     }
                 ]
-            }
-        ],
-        "dog_happy_end": [
-            {
-                "is_ending": true,
-                "ending_text": "狗狗結局：你們一起散步，成為了好朋友。",
-                "background": "res://resources/endings/ending-dog.png"
             }
         ],
         "feeling_route_1": [
@@ -144,7 +137,7 @@
                 "choices": [
                     {
                         "text": "一起去吧！",
-                        "next_dialogue": "feeling_happy_end"
+                        "next_ending": "feeling_happy_end"
                     }
                 ]
             }
@@ -164,20 +157,13 @@
                 "choices": [
                     {
                         "text": "我想多聊聊...",
-                        "next_dialogue": "feeling_happy_end"
+                        "next_ending": "feeling_happy_end"
                     },
                     {
                         "text": "算了，不說也罷",
                         "next_dialogue": "stalker_route_2"
                     }
                 ]
-            }
-        ],
-        "feeling_happy_end": [
-            {
-                "is_ending": true,
-                "ending_text": "傾訴結局：你們聊了很久，心情好多了。",
-                "background": "res://resources/endings/ending-home.png"
             }
         ],
         "stalker_route_1": [
@@ -209,12 +195,13 @@
                 "character": "莉莉",
                 "text": "你該不會一直在觀察我吧？",
                 "character_image": "res://resources/characters/girl-a-angry.png",
-                "background": "res://resources/backgrounds/a-park.png"
-            },
-            {
-                "is_ending": true,
-                "ending_text": "壞結局：你被當成了跟蹤狂...",
-                "background": "res://resources/endings/ending-fail.png"
+                "background": "res://resources/backgrounds/a-park.png",
+                "choices": [
+                    {
+                        "text": "...",
+                        "next_ending": "stalker_bad_end"
+                    }
+                ]
             }
         ],
         "stalker_route_3": [
@@ -235,5 +222,19 @@
                 ]
             }
         ]
+    },
+    "endings": {
+        "dog_happy_end": {
+            "ending_text": "狗狗結局：你們一起散步，成為了好朋友。",
+            "background": "res://resources/endings/ending-dog.png"
+        },
+        "feeling_happy_end": {
+            "ending_text": "傾訴結局：你們聊了很久，心情好多了。",
+            "background": "res://resources/endings/ending-home.png"
+        },
+        "stalker_bad_end": {
+            "ending_text": "壞結局：你被當成了跟蹤狂...",
+            "background": "res://resources/endings/ending-fail.png"
+        }
     }
 } 
