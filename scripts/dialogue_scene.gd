@@ -1,5 +1,12 @@
 extends CanvasLayer
 
+## 對話系統控制器
+## 處理對話內容的顯示、選項選擇和結局展示
+## 包含對話數據的加載和管理功能
+
+const CHOICE_BUTTON_HEIGHT = 50
+const DIALOGUE_FILE_PATH = "res://dialogue_data.json"
+
 var current_dialogue = []
 var current_index = 0
 var dialogue_data = {}
@@ -7,19 +14,22 @@ var dialogue_routes = {}
 var endings = {}
 
 func load_dialogue_data():
-	var file = FileAccess.open("res://dialogue_data.json", FileAccess.READ)
-	if file:
-		var json_text = file.get_as_text()
-		var json = JSON.new()
-		var error = json.parse(json_text)
-		if error == OK:
-			dialogue_data = json.data
-			dialogue_routes = dialogue_data["routes"]
-			endings = dialogue_data["endings"]
-		else:
-			print("JSON 解析錯誤：", json.get_error_message())
-	else:
-		print("無法開啟對話資料檔案")
+	var file = FileAccess.open(DIALOGUE_FILE_PATH, FileAccess.READ)
+	if not file:
+		push_error("無法開啟對話資料檔案：" + DIALOGUE_FILE_PATH)
+		return
+		
+	var json_text = file.get_as_text()
+	var json = JSON.new()
+	var error = json.parse(json_text)
+	
+	if error != OK:
+		push_error("JSON 解析錯誤：" + json.get_error_message())
+		return
+		
+	dialogue_data = json.data
+	dialogue_routes = dialogue_data["routes"]
+	endings = dialogue_data["endings"]
 
 func _ready():
 	# 載入對話資料
@@ -110,7 +120,7 @@ func show_choices(choices):
 	for choice in choices:
 		var button = Button.new()
 		button.text = choice["text"]
-		button.custom_minimum_size = Vector2(0, 50)
+		button.custom_minimum_size = Vector2(0, CHOICE_BUTTON_HEIGHT)
 		button.pressed.connect(_on_choice_selected.bind(choice))
 		$UIRoot/ChoicePanel/ChoiceContainer.add_child(button)
 	
