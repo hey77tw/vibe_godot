@@ -87,13 +87,17 @@
         "dog_route_2b": [
             {
                 "character": "莉莉",
-                "text": "這樣啊...那我們改天再約吧！",
+                "text": "這樣啊...",
                 "character_image": "res://resources/characters/girl-a-sad.png",
                 "background": "res://resources/backgrounds/a-park.png",
                 "choices": [
                     {
-                        "text": "好，改天見！",
-                        "next_dialogue": "feeling_route_2"
+                        "text": "騙你的啦，牠很喜歡你喔！你來摸摸他吧～",
+                        "next_dialogue": "dog_route_2a"
+                    },
+                    {
+                        "text": "其實他原本很親人，但最近發生了一些事⋯⋯",
+                        "next_dialogue": "feeling_route_3"
                     }
                 ]
             }
@@ -160,7 +164,7 @@
                         "next_ending": "feeling_happy_end"
                     },
                     {
-                        "text": "算了，不說也罷",
+                        "text": "我很想見到你，所以才在這裡等你。",
                         "next_dialogue": "stalker_route_2"
                     }
                 ]
@@ -212,12 +216,12 @@
                 "background": "res://resources/backgrounds/a-park.png",
                 "choices": [
                     {
-                        "text": "其實我有事想跟你說...",
+                        "text": "其實我喜歡你很久了...",
                         "next_dialogue": "stalker_route_2"
                     },
                     {
-                        "text": "抱歉，我先走了",
-                        "next_dialogue": "feeling_route_2"
+                        "text": "你想太多了啦～我才沒那麼閒，最近可是很忙的！",
+                        "next_dialogue": "feeling_route_1"
                     }
                 ]
             }

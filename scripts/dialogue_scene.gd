@@ -151,7 +151,26 @@ func show_choices(choices):
 func _on_choice_selected(choice):
 	# 隱藏選項面板
 	$UIRoot/ChoicePanel.visible = false
-	
+
+	# 先插入主角說選項內容的對話
+	if choice.has("text"):
+		var say_choice = {
+			"character": "我",
+			"text": choice["text"]
+		}
+		# 將這句話插入到下一段對話的最前面
+		if choice.has("next_dialogue") and dialogue_routes.has(choice["next_dialogue"]):
+			current_dialogue = [say_choice] + dialogue_routes[choice["next_dialogue"]]
+			current_index = 0
+			show_current_dialogue()
+			return
+		elif choice.has("next_ending") and endings.has(choice["next_ending"]):
+			# 結局前也插入
+			current_dialogue = [say_choice, {"is_ending": true, "ending_text": endings[choice["next_ending"]]["ending_text"], "background": endings[choice["next_ending"]]["background"]}]
+			current_index = 0
+			show_current_dialogue()
+			return
+
 	# 檢查是否為結局
 	if choice.has("next_ending") and endings.has(choice["next_ending"]):
 		show_ending(endings[choice["next_ending"]])
