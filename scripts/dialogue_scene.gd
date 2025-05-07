@@ -4,7 +4,7 @@ extends CanvasLayer
 ## 處理對話內容的顯示、選項選擇和結局展示
 ## 包含對話數據的加載和管理功能
 
-const CHOICE_BUTTON_HEIGHT = 50
+const CHOICE_BUTTON_HEIGHT = 60
 const DIALOGUE_FILE_PATH = "res://dialogue_data.json"
 
 var current_dialogue = []
@@ -12,6 +12,13 @@ var current_index = 0
 var dialogue_data = {}
 var dialogue_routes = {}
 var endings = {}
+
+# 打字機效果相關變數
+var typewriter_speed := 0.08
+var fast_typewriter_speed := 0.01
+var is_typing := false
+var skip_typewriter := false
+
 
 func load_dialogue_data():
 	var file = FileAccess.open(DIALOGUE_FILE_PATH, FileAccess.READ)
@@ -55,6 +62,18 @@ func restart_game():
 	# 顯示初始對話
 	show_current_dialogue()
 
+func typewriter_effect(label, text: String) -> void:
+	is_typing = true
+	label.text = ""
+	for i in text.length():
+		if skip_typewriter:
+			label.text = text
+			break
+		label.text += text[i]
+		await get_tree().create_timer(typewriter_speed).timeout
+	is_typing = false
+	skip_typewriter = false
+
 func show_current_dialogue():
 	if current_index >= len(current_dialogue):
 		return
@@ -66,20 +85,22 @@ func show_current_dialogue():
 		show_ending(dialogue)
 		return
 		
-	$UIRoot/DialoguePanel/CharacterName.text = dialogue["character"]
-	$UIRoot/DialoguePanel/DialogueText.text = dialogue["text"]
-	
 	# 如果有角色圖片
 	if dialogue.has("character_image"):
 		var texture = load(dialogue["character_image"])
 		if texture:
 			$UIRoot/CharacterSprite.texture = texture
-		
 	# 如果有背景
 	if dialogue.has("background"):
 		var texture = load(dialogue["background"])
 		if texture:
 			$UIRoot/Background.texture = texture
+
+	$UIRoot/DialoguePanel/CharacterName.text = dialogue["character"]
+	# 用打字機效果顯示對話，結尾自動加上 ▼
+	var display_text = dialogue["text"] + " ▼"
+	await typewriter_effect($UIRoot/DialoguePanel/DialogueText, display_text)
+	
 			
 	# 如果有選項
 	if dialogue.has("choices"):
@@ -92,7 +113,7 @@ func show_ending(ending_data):
 	# 隱藏角色名稱
 	$UIRoot/DialoguePanel/CharacterName.visible = false
 	
-	# 設置並顯示結局文字
+	# 設置並顯示結局文字，結尾自動加上 ▼
 	$UIRoot/DialoguePanel/DialogueText.text = ending_data["ending_text"]
 	$UIRoot/DialoguePanel/DialogueText.visible = true
 	
@@ -145,7 +166,13 @@ func _input(event):
 		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 			# 如果選項面板可見，不要進行下一段對話
 			if not $UIRoot/ChoicePanel.visible:
-				next_dialogue()
+				# 如果正在打字，點擊加速
+				if is_typing:
+					typewriter_speed = fast_typewriter_speed
+					skip_typewriter = true
+				else:
+					typewriter_speed = 0.08 # 恢復預設速度
+					next_dialogue()
 
 func next_dialogue():
 	current_index += 1
