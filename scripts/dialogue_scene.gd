@@ -126,7 +126,11 @@ func show_ending(ending_data):
 		if texture:
 			$UIRoot/Background.texture = texture
 	
-	# 顯示重新開始按鈕
+	# 隱藏重新開始按鈕，稍後顯示
+	$UIRoot/RestartButton.visible = false
+	
+	# 等待3秒後再顯示重新開始按鈕
+	await get_tree().create_timer(2.0).timeout
 	$UIRoot/RestartButton.visible = true
 
 func _on_restart_button_pressed():
