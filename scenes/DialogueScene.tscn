@@ -1,9 +1,11 @@
-[gd_scene load_steps=6 format=3 uid="uid://dvkucbs2fvrom"]
+[gd_scene load_steps=7 format=3 uid="uid://dvkucbs2fvrom"]
 
 [ext_resource type="Script" uid="uid://btx7ypdfnjs4k" path="res://scripts/dialogue_scene.gd" id="1_c4h3t"]
+[ext_resource type="FontFile" uid="uid://cqp0jt4hja0sx" path="res://assets/fonts/STHeiti Medium.ttc" id="2_65go0"]
 [ext_resource type="Theme" uid="uid://skacphy0ms5v" path="res://theme.tres" id="3_65go0"]
 
 [sub_resource type="Theme" id="Theme_c4h3t"]
+default_font = ExtResource("2_65go0")
 default_font_size = 35
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_at7bl"]

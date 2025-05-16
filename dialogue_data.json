@@ -3,14 +3,14 @@
         {
             "character": "莉莉",
             "text": "哈囉～好久不見！你也來公園散步嗎？",
-            "character_image": "res://resources/characters/girl-a-normal.png",
-            "background": "res://resources/backgrounds/a-park.png"
+            "character_image": "res://assets/characters/girl-a-normal.png",
+            "background": "res://assets/backgrounds/a-park.png"
         },
         {
             "character": "我",
             "text": "嗨，好久不見⋯⋯",
-            "character_image": "res://resources/characters/girl-a-normal.png",
-            "background": "res://resources/backgrounds/a-park.png",
+            "character_image": "res://assets/characters/girl-a-normal.png",
+            "background": "res://assets/backgrounds/a-park.png",
             "choices": [
                 {
                     "text": "我來溜狗啦",
@@ -32,20 +32,20 @@
             {
                 "character": "莉莉",
                 "text": "哇！好可愛的狗狗！你養多久了啊？",
-                "character_image": "res://resources/characters/girl-a-surprise.png",
-                "background": "res://resources/backgrounds/a-park.png"
+                "character_image": "res://assets/characters/girl-a-surprise.png",
+                "background": "res://assets/backgrounds/a-park.png"
             },
             {
                 "character": "我",
                 "text": "其實才養了兩個月而已。",
-                "character_image": "res://resources/characters/girl-a-normal.png",
-                "background": "res://resources/backgrounds/a-park.png"
+                "character_image": "res://assets/characters/girl-a-normal.png",
+                "background": "res://assets/backgrounds/a-park.png"
             },
             {
                 "character": "莉莉",
                 "text": "可以讓我摸摸牠嗎？",
-                "character_image": "res://resources/characters/girl-a-normal.png",
-                "background": "res://resources/backgrounds/a-park.png",
+                "character_image": "res://assets/characters/girl-a-normal.png",
+                "background": "res://assets/backgrounds/a-park.png",
                 "choices": [
                     {
                         "text": "當然可以！牠很親人的",
@@ -62,20 +62,20 @@
             {
                 "character": "莉莉",
                 "text": "真的好可愛！而且好乖喔～",
-                "character_image": "res://resources/characters/girl-a-surprise.png",
-                "background": "res://resources/backgrounds/a-park.png"
+                "character_image": "res://assets/characters/girl-a-surprise.png",
+                "background": "res://assets/backgrounds/a-park.png"
             },
             {
                 "character": "我",
                 "text": "對啊，牠很喜歡你呢！",
-                "character_image": "res://resources/characters/girl-a-normal.png",
-                "background": "res://resources/backgrounds/a-park.png"
+                "character_image": "res://assets/characters/girl-a-normal.png",
+                "background": "res://assets/backgrounds/a-park.png"
             },
             {
                 "character": "莉莉",
                 "text": "我也很喜歡狗狗！我們要不要一起散步？",
-                "character_image": "res://resources/characters/girl-a-normal.png",
-                "background": "res://resources/backgrounds/a-park.png",
+                "character_image": "res://assets/characters/girl-a-normal.png",
+                "background": "res://assets/backgrounds/a-park.png",
                 "choices": [
                     {
                         "text": "好啊，一起走吧！",
@@ -88,8 +88,8 @@
             {
                 "character": "莉莉",
                 "text": "這樣啊...",
-                "character_image": "res://resources/characters/girl-a-sad.png",
-                "background": "res://resources/backgrounds/a-park.png",
+                "character_image": "res://assets/characters/girl-a-sad.png",
+                "background": "res://assets/backgrounds/a-park.png",
                 "choices": [
                     {
                         "text": "騙你的啦，牠很喜歡你喔！你來摸摸他吧～",
@@ -106,14 +106,14 @@
             {
                 "character": "莉莉",
                 "text": "你最近怎麼了？還好嗎？",
-                "character_image": "res://resources/characters/girl-a-surprise.png",
-                "background": "res://resources/backgrounds/a-park.png"
+                "character_image": "res://assets/characters/girl-a-surprise.png",
+                "background": "res://assets/backgrounds/a-park.png"
             },
             {
                 "character": "我",
                 "text": "喔，沒什麼啦...",
-                "character_image": "res://resources/characters/girl-a-normal.png",
-                "background": "res://resources/backgrounds/a-park.png",
+                "character_image": "res://assets/characters/girl-a-normal.png",
+                "background": "res://assets/backgrounds/a-park.png",
                 "choices": [
                     {
                         "text": "只是工作有點累...",
@@ -130,14 +130,14 @@
             {
                 "character": "莉莉",
                 "text": "工作太忙了嗎？要不要去喝杯咖啡？",
-                "character_image": "res://resources/characters/girl-a-normal.png",
-                "background": "res://resources/backgrounds/a-park.png"
+                "character_image": "res://assets/characters/girl-a-normal.png",
+                "background": "res://assets/backgrounds/a-park.png"
             },
             {
                 "character": "我",
                 "text": "好啊，正好附近有間不錯的咖啡廳。",
-                "character_image": "res://resources/characters/girl-a-normal.png",
-                "background": "res://resources/backgrounds/a-park.png",
+                "character_image": "res://assets/characters/girl-a-normal.png",
+                "background": "res://assets/backgrounds/a-park.png",
                 "choices": [
                     {
                         "text": "一起去吧！",
@@ -150,14 +150,14 @@
             {
                 "character": "莉莉",
                 "text": "欸？是發生什麼事了嗎？",
-                "character_image": "res://resources/characters/girl-a-surprise.png",
-                "background": "res://resources/backgrounds/a-park.png"
+                "character_image": "res://assets/characters/girl-a-surprise.png",
+                "background": "res://assets/backgrounds/a-park.png"
             },
             {
                 "character": "我",
                 "text": "其實...",
-                "character_image": "res://resources/characters/girl-a-sad.png",
-                "background": "res://resources/backgrounds/a-park.png",
+                "character_image": "res://assets/characters/girl-a-sad.png",
+                "background": "res://assets/backgrounds/a-park.png",
                 "choices": [
                     {
                         "text": "我想多聊聊...",
@@ -174,14 +174,14 @@
             {
                 "character": "莉莉",
                 "text": "咦？你怎麼知道我會在這裡？",
-                "character_image": "res://resources/characters/girl-a-surprise.png",
-                "background": "res://resources/backgrounds/a-park.png"
+                "character_image": "res://assets/characters/girl-a-surprise.png",
+                "background": "res://assets/backgrounds/a-park.png"
             },
             {
                 "character": "我",
                 "text": "這個嘛...",
-                "character_image": "res://resources/characters/girl-a-normal.png",
-                "background": "res://resources/backgrounds/a-park.png",
+                "character_image": "res://assets/characters/girl-a-normal.png",
+                "background": "res://assets/backgrounds/a-park.png",
                 "choices": [
                     {
                         "text": "我常常看到你在這裡散步",
@@ -198,8 +198,8 @@
             {
                 "character": "莉莉",
                 "text": "你該不會一直在觀察我吧？",
-                "character_image": "res://resources/characters/girl-a-angry.png",
-                "background": "res://resources/backgrounds/a-park.png",
+                "character_image": "res://assets/characters/girl-a-angry.png",
+                "background": "res://assets/backgrounds/a-park.png",
                 "choices": [
                     {
                         "text": "...",
@@ -212,8 +212,8 @@
             {
                 "character": "莉莉",
                 "text": "真的嗎？怎麼感覺怪怪的...",
-                "character_image": "res://resources/characters/girl-a-sad.png",
-                "background": "res://resources/backgrounds/a-park.png",
+                "character_image": "res://assets/characters/girl-a-sad.png",
+                "background": "res://assets/backgrounds/a-park.png",
                 "choices": [
                     {
                         "text": "其實我喜歡你很久了...",
@@ -230,15 +230,15 @@
     "endings": {
         "dog_happy_end": {
             "ending_text": "狗狗結局：你們一起散步，成為了好朋友。",
-            "background": "res://resources/endings/ending-dog.png"
+            "background": "res://assets/endings/ending-dog.png"
         },
         "feeling_happy_end": {
             "ending_text": "傾訴結局：你們聊了很久，心情好多了。",
-            "background": "res://resources/endings/ending-home.png"
+            "background": "res://assets/endings/ending-home.png"
         },
         "stalker_bad_end": {
             "ending_text": "壞結局：你被當成了跟蹤狂...",
-            "background": "res://resources/endings/ending-fail.png"
+            "background": "res://assets/endings/ending-fail.png"
         }
     }
 } 
