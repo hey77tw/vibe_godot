@@ -1,203 +1,315 @@
 extends CanvasLayer
 
-## 對話系統控制器
-## 處理對話內容的顯示、選項選擇和結局展示
-## 包含對話數據的加載和管理功能
+# 這是一個對話系統腳本
+# 主要功能：顯示對話、處理選項、展示結局
+# 適合程式初學者學習
 
+# ===== 遊戲設定 =====
+# 按鈕的高度
 const CHOICE_BUTTON_HEIGHT = 60
+# 對話資料檔案的位置
 const DIALOGUE_FILE_PATH = "res://dialogue_data.json"
 
+# ===== 遊戲狀態變數 =====
+# 目前的對話內容（一串對話）
 var current_dialogue = []
+# 目前顯示到第幾句對話
 var current_index = 0
+# 從檔案讀取的所有對話資料
 var dialogue_data = {}
+# 所有對話路線
 var dialogue_routes = {}
+# 所有結局
 var endings = {}
 
-# 打字機效果相關變數
-var typewriter_speed := 0.08
-var fast_typewriter_speed := 0.01
-var is_typing := false
-var skip_typewriter := false
+# ===== 打字機效果變數 =====
+# 打字速度（正常）
+var typewriter_speed = 0.08
+# 打字速度（快速）
+var fast_typewriter_speed = 0.01
+# 是否正在打字
+var is_typing = false
+# 是否要跳過打字效果
+var skip_typewriter = false
 
+# ===== 遊戲開始時執行 =====
+func _ready():
+	print("遊戲開始！載入對話資料...")
+	
+	# 步驟1：載入對話資料
+	load_dialogue_data()
+	
+	# 步驟2：連接重新開始按鈕
+	$UIRoot/RestartButton.pressed.connect(_on_restart_button_pressed)
+	
+	# 步驟3：開始遊戲
+	restart_game()
 
+# ===== 載入對話資料 =====
 func load_dialogue_data():
+	print("開始載入對話資料...")
+	
+	# 開啟檔案
 	var file = FileAccess.open(DIALOGUE_FILE_PATH, FileAccess.READ)
 	if not file:
-		push_error("無法開啟對話資料檔案：" + DIALOGUE_FILE_PATH)
+		print("錯誤：找不到對話資料檔案")
 		return
-		
+	
+	# 讀取檔案內容
 	var json_text = file.get_as_text()
+	file.close()
+	
+	# 解析JSON格式
 	var json = JSON.new()
 	var error = json.parse(json_text)
 	
 	if error != OK:
-		push_error("JSON 解析錯誤：" + json.get_error_message())
+		print("錯誤：對話資料格式不正確")
 		return
-		
+	
+	# 將資料存到變數中
 	dialogue_data = json.data
 	dialogue_routes = dialogue_data["routes"]
 	endings = dialogue_data["endings"]
-
-func _ready():
-	# 載入對話資料
-	load_dialogue_data()
 	
-	# 連接重新開始按鈕的信號
-	$UIRoot/RestartButton.pressed.connect(_on_restart_button_pressed)
-	restart_game()
+	print("對話資料載入完成！")
 
+# ===== 重新開始遊戲 =====
 func restart_game():
+	print("重新開始遊戲")
+	
 	# 重置遊戲狀態
-	current_dialogue = dialogue_data["initial_dialogue"] if dialogue_data.has("initial_dialogue") else []
+	current_dialogue = dialogue_data["initial_dialogue"]
 	current_index = 0
 	
-	# 重置UI
+	# 重置UI元件
+	show_dialogue_panel()
+	$UIRoot/ChoicePanel.visible = false
+	$UIRoot/RestartButton.visible = false
+	$UIRoot/CharacterSprite.visible = true
+	
+	# 開始顯示第一句對話
+	show_current_dialogue()
+
+# ===== 顯示對話面板 =====
+func show_dialogue_panel():
 	$UIRoot/DialoguePanel.visible = true
 	$UIRoot/DialoguePanel.modulate.a = 1
 	$UIRoot/DialoguePanel/CharacterName.visible = true
-	$UIRoot/CharacterSprite.visible = true
-	$UIRoot/ChoicePanel.visible = false
-	$UIRoot/RestartButton.visible = false
-	
-	# 顯示初始對話
-	show_current_dialogue()
 
-func typewriter_effect(label, text: String) -> void:
-	is_typing = true
-	label.text = ""
-	for i in text.length():
-		if skip_typewriter:
-			label.text = text
-			break
-		label.text += text[i]
-		await get_tree().create_timer(typewriter_speed).timeout
-	is_typing = false
-	skip_typewriter = false
 
+# ===== 顯示目前的對話 =====
 func show_current_dialogue():
+	# 檢查是否還有對話要顯示
 	if current_index >= len(current_dialogue):
+		print("對話結束")
 		return
-		
+	
+	# 取得目前這句對話的資料
 	var dialogue = current_dialogue[current_index]
 	
 	# 檢查是否為結局
 	if dialogue.has("is_ending"):
 		show_ending(dialogue)
 		return
-		
-	# 如果有角色圖片
-	if dialogue.has("character_image"):
-		var texture = load(dialogue["character_image"])
-		if texture:
-			$UIRoot/CharacterSprite.texture = texture
-	# 如果有背景
-	if dialogue.has("background"):
-		var texture = load(dialogue["background"])
-		if texture:
-			$UIRoot/Background.texture = texture
-
-	$UIRoot/DialoguePanel/CharacterName.text = dialogue["character"]
-	# 用打字機效果顯示對話，結尾自動加上 ▼
-	var display_text = dialogue["text"] + " ▼"
-	await typewriter_effect($UIRoot/DialoguePanel/DialogueText, display_text)
 	
-			
-	# 如果有選項
+	# 更換角色圖片（如果有的話）
+	if dialogue.has("character_image"):
+		change_character_image(dialogue["character_image"])
+	
+	# 更換背景圖片（如果有的話）
+	if dialogue.has("background"):
+		change_background(dialogue["background"])
+	
+	# 顯示角色名字
+	$UIRoot/DialoguePanel/CharacterName.text = dialogue["character"]
+	
+	# 用打字機效果顯示對話內容
+	var text_to_show = dialogue["text"] + " ▼"
+	await start_typewriter_effect(text_to_show)
+	
+	# 如果這句對話有選項，就顯示選項
 	if dialogue.has("choices"):
 		show_choices(dialogue["choices"])
 
+# ===== 更換角色圖片 =====
+func change_character_image(image_path):
+	var texture = load(image_path)
+	if texture:
+		$UIRoot/CharacterSprite.texture = texture
+		print("更換角色圖片：" + image_path)
+
+# ===== 更換背景圖片 =====
+func change_background(image_path):
+	var texture = load(image_path)
+	if texture:
+		$UIRoot/Background.texture = texture
+		print("更換背景：" + image_path)
+
+# ===== 打字機效果 =====
+func start_typewriter_effect(text: String):
+	print("開始打字機效果：" + text)
+	
+	# 設定正在打字的狀態
+	is_typing = true
+	
+	# 清空對話框
+	$UIRoot/DialoguePanel/DialogueText.text = ""
+	
+	# 一個字一個字慢慢顯示
+	for i in text.length():
+		# 如果玩家點擊加速，就直接顯示全部文字
+		if skip_typewriter:
+			$UIRoot/DialoguePanel/DialogueText.text = text
+			break
+		
+		# 加上一個字
+		$UIRoot/DialoguePanel/DialogueText.text += text[i]
+		
+		# 等待一小段時間
+		await get_tree().create_timer(typewriter_speed).timeout
+	
+	# 打字完成
+	is_typing = false
+	skip_typewriter = false
+	print("打字機效果完成")
+
+# ===== 顯示結局 =====
 func show_ending(ending_data):
+	print("顯示結局")
+	
 	# 隱藏角色
 	$UIRoot/CharacterSprite.visible = false
 	
-	# 隱藏角色名稱
+	# 隱藏角色名字
 	$UIRoot/DialoguePanel/CharacterName.visible = false
 	
-	# 設置並顯示結局文字，結尾自動加上 ▼
+	# 顯示結局文字
 	$UIRoot/DialoguePanel/DialogueText.text = ending_data["ending_text"]
 	$UIRoot/DialoguePanel/DialogueText.visible = true
 	
-	# 保持對話框面板可見，但調整其透明度
+	# 讓對話框變半透明
 	$UIRoot/DialoguePanel.modulate.a = 0.8
 	
-	# 更新背景
+	# 更換結局背景
 	if ending_data.has("background"):
-		var texture = load(ending_data["background"])
-		if texture:
-			$UIRoot/Background.texture = texture
+		change_background(ending_data["background"])
 	
-	# 隱藏重新開始按鈕，稍後顯示
-	$UIRoot/RestartButton.visible = false
-	
-	# 等待3秒後再顯示重新開始按鈕
+	# 等待2秒後顯示重新開始按鈕
 	await get_tree().create_timer(2.0).timeout
 	$UIRoot/RestartButton.visible = true
 
-func _on_restart_button_pressed():
-	restart_game()
-
+# ===== 顯示選項 =====
 func show_choices(choices):
-	# 清除現有的選項按鈕
-	for child in $UIRoot/ChoicePanel/ChoiceContainer.get_children():
-		child.queue_free()
+	print("顯示選項，共有 " + str(len(choices)) + " 個選項")
 	
-	# 創建新的選項按鈕
+	# 刪除舊的選項按鈕
+	clear_old_choice_buttons()
+	
+	# 為每個選項創建一個按鈕
 	for choice in choices:
-		var button = Button.new()
-		button.text = choice["text"]
-		button.custom_minimum_size = Vector2(0, CHOICE_BUTTON_HEIGHT)
-		button.pressed.connect(_on_choice_selected.bind(choice))
-		$UIRoot/ChoicePanel/ChoiceContainer.add_child(button)
+		create_choice_button(choice)
 	
 	# 顯示選項面板
 	$UIRoot/ChoicePanel.visible = true
 
+# ===== 清除舊的選項按鈕 =====
+func clear_old_choice_buttons():
+	for child in $UIRoot/ChoicePanel/ChoiceContainer.get_children():
+		child.queue_free()
+
+# ===== 創建選項按鈕 =====
+func create_choice_button(choice):
+	# 創建新按鈕
+	var button = Button.new()
+	button.text = choice["text"]
+	button.custom_minimum_size = Vector2(0, CHOICE_BUTTON_HEIGHT)
+	
+	# 當按鈕被點擊時，執行選項被選擇的函式
+	button.pressed.connect(_on_choice_selected.bind(choice))
+	
+	# 將按鈕加到選項容器中
+	$UIRoot/ChoicePanel/ChoiceContainer.add_child(button)
+
+# ===== 當選項被選擇時 =====
 func _on_choice_selected(choice):
+	print("玩家選擇了：" + choice["text"])
+	
 	# 隱藏選項面板
 	$UIRoot/ChoicePanel.visible = false
+	
+	# 讓主角說出選擇的內容
+	var player_dialogue = {
+		"character": "我",
+		"text": choice["text"]
+	}
+	
+	# 決定接下來要顯示什麼
+	if choice.has("next_ending"):
+		# 如果是結局，先讓主角說話，然後顯示結局
+		handle_ending_choice(player_dialogue, choice)
+	elif choice.has("next_dialogue"):
+		# 如果是繼續對話，先讓主角說話，然後繼續對話
+		handle_dialogue_choice(player_dialogue, choice)
 
-	# 先插入主角說選項內容的對話
-	if choice.has("text"):
-		var say_choice = {
-			"character": "我",
-			"text": choice["text"]
+# ===== 處理結局選項 =====
+func handle_ending_choice(player_dialogue, choice):
+	if endings.has(choice["next_ending"]):
+		var ending_data = endings[choice["next_ending"]]
+		var ending_dialogue = {
+			"is_ending": true,
+			"ending_text": ending_data["ending_text"],
+			"background": ending_data["background"]
 		}
-		# 將這句話插入到下一段對話的最前面
-		if choice.has("next_dialogue") and dialogue_routes.has(choice["next_dialogue"]):
-			current_dialogue = [say_choice] + dialogue_routes[choice["next_dialogue"]]
-			current_index = 0
-			show_current_dialogue()
-			return
-		elif choice.has("next_ending") and endings.has(choice["next_ending"]):
-			# 結局前也插入
-			current_dialogue = [say_choice, {"is_ending": true, "ending_text": endings[choice["next_ending"]]["ending_text"], "background": endings[choice["next_ending"]]["background"]}]
-			current_index = 0
-			show_current_dialogue()
-			return
-
-	# 檢查是否為結局
-	if choice.has("next_ending") and endings.has(choice["next_ending"]):
-		show_ending(endings[choice["next_ending"]])
-	# 切換到選擇的對話路線
-	elif choice.has("next_dialogue") and dialogue_routes.has(choice["next_dialogue"]):
-		current_dialogue = dialogue_routes[choice["next_dialogue"]]
+		
+		# 組合對話：主角說話 + 結局
+		current_dialogue = [player_dialogue, ending_dialogue]
 		current_index = 0
 		show_current_dialogue()
 
+# ===== 處理對話選項 =====
+func handle_dialogue_choice(player_dialogue, choice):
+	if dialogue_routes.has(choice["next_dialogue"]):
+		# 組合對話：主角說話 + 新的對話路線
+		current_dialogue = [player_dialogue] + dialogue_routes[choice["next_dialogue"]]
+		current_index = 0
+		show_current_dialogue()
+
+# ===== 重新開始按鈕被點擊 =====
+func _on_restart_button_pressed():
+	print("重新開始按鈕被點擊")
+	restart_game()
+
+# ===== 處理玩家輸入（滑鼠點擊） =====
 func _input(event):
+	# 檢查是否為滑鼠左鍵點擊
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-			# 如果選項面板可見，不要進行下一段對話
-			if not $UIRoot/ChoicePanel.visible:
-				# 如果正在打字，點擊加速
-				if is_typing:
-					typewriter_speed = fast_typewriter_speed
-					skip_typewriter = true
-				else:
-					typewriter_speed = 0.08 # 恢復預設速度
-					next_dialogue()
+			handle_mouse_click()
 
+# ===== 處理滑鼠點擊 =====
+func handle_mouse_click():
+	# 如果選項面板正在顯示，就不要進行下一段對話
+	if $UIRoot/ChoicePanel.visible:
+		return
+	
+	# 如果正在打字，點擊可以加速
+	if is_typing:
+		typewriter_speed = fast_typewriter_speed
+		skip_typewriter = true
+		print("加速打字")
+	else:
+		# 恢復正常打字速度，進入下一句對話
+		typewriter_speed = 0.08
+		next_dialogue()
+
+# ===== 進入下一句對話 =====
 func next_dialogue():
+	print("進入下一句對話")
 	current_index += 1
+	
+	# 檢查是否還有對話
 	if current_index < len(current_dialogue):
 		show_current_dialogue()
+	else:
+		print("這個對話路線結束了")
