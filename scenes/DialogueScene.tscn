@@ -1,6 +1,6 @@
 [gd_scene load_steps=7 format=3 uid="uid://dvkucbs2fvrom"]
 
-[ext_resource type="Script" uid="uid://btx7ypdfnjs4k" path="res://scripts/dialogue_scene.gd" id="1_c4h3t"]
+[ext_resource type="Script" uid="uid://hoopku5o2mo" path="res://scripts/dialogue_scene_new.gd" id="1_65go0"]
 [ext_resource type="FontFile" uid="uid://cqp0jt4hja0sx" path="res://assets/fonts/STHeiti Medium.ttc" id="2_65go0"]
 [ext_resource type="Theme" uid="uid://skacphy0ms5v" path="res://theme.tres" id="3_65go0"]
 
@@ -33,7 +33,7 @@ corner_radius_bottom_right = 10
 corner_radius_bottom_left = 10
 
 [node name="root" type="CanvasLayer"]
-script = ExtResource("1_c4h3t")
+script = ExtResource("1_65go0")
 
 [node name="UIRoot" type="Control" parent="."]
 layout_mode = 3
