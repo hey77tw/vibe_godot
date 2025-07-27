@@ -1,40 +1,39 @@
 extends CanvasLayer
 
-# 這是一個對話系統腳本
+# 使用dokivn addon的對話系統腳本
 # 主要功能：顯示對話、處理選項、展示結局
 # 適合程式初學者學習
 
 # ===== 遊戲設定 =====
-# 按鈕的高度
-const CHOICE_BUTTON_HEIGHT = 60
 # 對話資料檔案的位置
 const DIALOGUE_FILE_PATH = "res://dialogue_data.json"
 
+# ===== dokivn系統 =====
+# 主要的腳本管理器
+var scripted: Scripted
+# 角色字典
+var characters: Dictionary = {}
+
 # ===== 遊戲狀態變數 =====
-# 目前的對話內容（一串對話）
-var current_dialogue = []
-# 目前顯示到第幾句對話
-var current_index = 0
 # 從檔案讀取的所有對話資料
 var dialogue_data = {}
 # 所有對話路線
 var dialogue_routes = {}
 # 所有結局
 var endings = {}
-
-# ===== 打字機效果變數 =====
-# 打字速度（正常）
-var typewriter_speed = 0.08
-# 打字速度（快速）
-var fast_typewriter_speed = 0.01
-# 是否正在打字
-var is_typing = false
-# 是否要跳過打字效果
-var skip_typewriter = false
+# 目前是否在遊戲中
+var game_running = false
 
 # ===== 遊戲開始時執行 =====
 func _ready():
 	print("遊戲開始！載入對話資料...")
+	
+	# 初始化dokivn系統
+	scripted = Scripted.new()
+	scripted.from = self
+	
+	# 連接確認信號到滑鼠點擊
+	scripted.confirm.connect(_on_dialogue_confirm)
 	
 	# 步驟1：載入對話資料
 	load_dialogue_data()
@@ -78,39 +77,127 @@ func load_dialogue_data():
 func restart_game():
 	print("重新開始遊戲")
 	
-	# 重置遊戲狀態
-	current_dialogue = dialogue_data["initial_dialogue"]
-	current_index = 0
+	# 如果遊戲正在運行，停止它
+	if game_running:
+		# 重新初始化scripted系統
+		scripted = Scripted.new()
+		scripted.from = self
+		scripted.confirm.connect(_on_dialogue_confirm)
 	
 	# 重置UI元件
-	show_dialogue_panel()
+	$UIRoot/DialoguePanel.visible = true
+	$UIRoot/DialoguePanel.modulate.a = 1
+	$UIRoot/DialoguePanel/CharacterName.visible = true
 	$UIRoot/ChoicePanel.visible = false
 	$UIRoot/RestartButton.visible = false
 	$UIRoot/CharacterSprite.visible = true
 	
-	# 開始顯示第一句對話
-	show_current_dialogue()
-
-# ===== 顯示對話面板 =====
-func show_dialogue_panel():
-	$UIRoot/DialoguePanel.visible = true
-	$UIRoot/DialoguePanel.modulate.a = 1
-	$UIRoot/DialoguePanel/CharacterName.visible = true
-
-
-# ===== 顯示目前的對話 =====
-func show_current_dialogue():
-	# 檢查是否還有對話要顯示
-	if current_index >= len(current_dialogue):
-		print("對話結束")
-		return
+	# 清空顯示
+	$UIRoot/DialoguePanel/DialogueText.text = ""
+	$UIRoot/DialoguePanel/CharacterName.text = ""
 	
-	# 取得目前這句對話的資料
-	var dialogue = current_dialogue[current_index]
+	# 創建角色
+	setup_characters()
+	
+	# 開始執行對話腳本
+	game_running = true
+	execute_initial_dialogue()
+
+# ===== 設定角色 =====
+func setup_characters():
+	characters.clear()
+	# 創建一個預設角色（可以根據需要擴展）
+	characters["default"] = scripted.character().name("角色").color(Color.WHITE)
+	characters["我"] = scripted.character().name("我").color(Color.CYAN)
+
+# ===== 執行初始對話 =====
+func execute_initial_dialogue():
+	if dialogue_data.has("initial_dialogue"):
+		# 創建對話樹結構
+		setup_dialogue_tree(dialogue_data["initial_dialogue"])
+		# 啟動dokivn系統
+		scripted.start()
+	else:
+		print("沒有找到初始對話資料")
+
+# ===== 設定對話樹結構 =====
+func setup_dialogue_tree(dialogue_sequence: Array):
+	for dialogue in dialogue_sequence:
+		add_dialogue_to_tree(dialogue)
+
+# ===== 將對話加入樹狀結構 =====
+func add_dialogue_to_tree(dialogue: Dictionary):
+	# 更換角色圖片（如果有的話）
+	if dialogue.has("character_image"):
+		var img_path = dialogue["character_image"]
+		scripted.register(VNTree.Jump.new(func(): change_character_image(img_path), []))
+	
+	# 更換背景圖片（如果有的話）
+	if dialogue.has("background"):
+		var bg_path = dialogue["background"]
+		scripted.register(VNTree.Jump.new(func(): change_background(bg_path), []))
 	
 	# 檢查是否為結局
 	if dialogue.has("is_ending"):
-		show_ending(dialogue)
+		scripted.register(VNTree.Jump.new(func(): await show_ending(dialogue), []))
+		return
+	
+	# 取得角色名稱和顯示對話
+	var character_name = dialogue.get("character", "")
+	var text_to_show = dialogue["text"]
+	var character = get_or_create_character(character_name)
+	var character_id = character.attr_address if character else scripted.NO_CHAR
+	
+	# 將對話加入樹狀結構
+	scripted.register(VNTree.DialogText.new(character_id, text_to_show))
+	
+	# 如果這句對話有選項，就加入選項
+	if dialogue.has("choices"):
+		var choice_option = scripted.choices("請選擇：")
+		for choice in dialogue["choices"]:
+			var choice_text = choice["text"]
+			var callback = create_choice_callback_for_tree(choice)
+			choice_option.option(choice_text, callback)
+
+# ===== 創建選項回調函數（用於樹狀結構） =====
+func create_choice_callback_for_tree(choice: Dictionary) -> Callable:
+	return func():
+		# 讓主角說出選擇的內容
+		var player_character = get_or_create_character("我")
+		scripted.register(VNTree.DialogText.new(player_character.attr_address, choice["text"]))
+		
+		# 決定接下來要顯示什麼
+		if choice.has("next_ending"):
+			handle_ending_choice_for_tree(choice)
+		elif choice.has("next_dialogue"):
+			handle_dialogue_choice_for_tree(choice)
+
+# ===== 處理結局選項（用於樹狀結構） =====
+func handle_ending_choice_for_tree(choice: Dictionary):
+	if endings.has(choice["next_ending"]):
+		var ending_data = endings[choice["next_ending"]]
+		var ending_dialogue = {
+			"is_ending": true,
+			"ending_text": ending_data["ending_text"],
+			"background": ending_data["background"]
+		}
+		add_dialogue_to_tree(ending_dialogue)
+
+# ===== 處理對話選項（用於樹狀結構） =====
+func handle_dialogue_choice_for_tree(choice: Dictionary):
+	if dialogue_routes.has(choice["next_dialogue"]):
+		setup_dialogue_tree(dialogue_routes[choice["next_dialogue"]])
+
+# ===== 執行對話序列 =====
+func execute_dialogue_sequence(dialogue_sequence: Array):
+	for dialogue in dialogue_sequence:
+		await execute_single_dialogue(dialogue)
+
+# ===== 執行單句對話 =====
+func execute_single_dialogue(dialogue: Dictionary):
+	# 檢查是否為結局
+	if dialogue.has("is_ending"):
+		await show_ending(dialogue)
 		return
 	
 	# 更換角色圖片（如果有的話）
@@ -121,139 +208,57 @@ func show_current_dialogue():
 	if dialogue.has("background"):
 		change_background(dialogue["background"])
 	
-	# 顯示角色名字
-	$UIRoot/DialoguePanel/CharacterName.text = dialogue["character"]
+	# 取得或創建角色
+	var character_name = dialogue.get("character", "")
+	var character = get_or_create_character(character_name)
 	
-	# 用打字機效果顯示對話內容
-	var text_to_show = dialogue["text"] + " ▼"
-	await start_typewriter_effect(text_to_show)
+	# 讓角色說話
+	var text_to_show = dialogue["text"]
+	if character:
+		character.says(text_to_show)
+	else:
+		scripted.says(text_to_show)
 	
 	# 如果這句對話有選項，就顯示選項
 	if dialogue.has("choices"):
-		show_choices(dialogue["choices"])
+		await handle_choices(dialogue["choices"])
 
-# ===== 更換角色圖片 =====
-func change_character_image(image_path):
-	var texture = load(image_path)
-	if texture:
-		$UIRoot/CharacterSprite.texture = texture
-		print("更換角色圖片：" + image_path)
+# ===== 取得或創建角色 =====
+func get_or_create_character(character_name: String) -> VNChar:
+	if character_name.is_empty():
+		return null
+	
+	if not characters.has(character_name):
+		characters[character_name] = scripted.character().name(character_name).color(Color.WHITE)
+	
+	return characters[character_name]
 
-# ===== 更換背景圖片 =====
-func change_background(image_path):
-	var texture = load(image_path)
-	if texture:
-		$UIRoot/Background.texture = texture
-		print("更換背景：" + image_path)
-
-# ===== 打字機效果 =====
-func start_typewriter_effect(text: String):
-	print("開始打字機效果：" + text)
+# ===== 處理選項 =====
+func handle_choices(choices: Array):
+	# 創建選項組
+	var choice_option = scripted.choices("請選擇：")
 	
-	# 設定正在打字的狀態
-	is_typing = true
-	
-	# 清空對話框
-	$UIRoot/DialoguePanel/DialogueText.text = ""
-	
-	# 一個字一個字慢慢顯示
-	for i in text.length():
-		# 如果玩家點擊加速，就直接顯示全部文字
-		if skip_typewriter:
-			$UIRoot/DialoguePanel/DialogueText.text = text
-			break
-		
-		# 加上一個字
-		$UIRoot/DialoguePanel/DialogueText.text += text[i]
-		
-		# 等待一小段時間
-		await get_tree().create_timer(typewriter_speed).timeout
-	
-	# 打字完成
-	is_typing = false
-	skip_typewriter = false
-	print("打字機效果完成")
-
-# ===== 顯示結局 =====
-func show_ending(ending_data):
-	print("顯示結局")
-	
-	# 隱藏角色
-	$UIRoot/CharacterSprite.visible = false
-	
-	# 隱藏角色名字
-	$UIRoot/DialoguePanel/CharacterName.visible = false
-	
-	# 顯示結局文字
-	$UIRoot/DialoguePanel/DialogueText.text = ending_data["ending_text"]
-	$UIRoot/DialoguePanel/DialogueText.visible = true
-	
-	# 讓對話框變半透明
-	$UIRoot/DialoguePanel.modulate.a = 0.8
-	
-	# 更換結局背景
-	if ending_data.has("background"):
-		change_background(ending_data["background"])
-	
-	# 等待2秒後顯示重新開始按鈕
-	await get_tree().create_timer(2.0).timeout
-	$UIRoot/RestartButton.visible = true
-
-# ===== 顯示選項 =====
-func show_choices(choices):
-	print("顯示選項，共有 " + str(len(choices)) + " 個選項")
-	
-	# 刪除舊的選項按鈕
-	clear_old_choice_buttons()
-	
-	# 為每個選項創建一個按鈕
+	# 為每個選項創建回調
 	for choice in choices:
-		create_choice_button(choice)
-	
-	# 顯示選項面板
-	$UIRoot/ChoicePanel.visible = true
+		var choice_text = choice["text"]
+		var callback = create_choice_callback(choice)
+		choice_option.option(choice_text, callback)
 
-# ===== 清除舊的選項按鈕 =====
-func clear_old_choice_buttons():
-	for child in $UIRoot/ChoicePanel/ChoiceContainer.get_children():
-		child.queue_free()
-
-# ===== 創建選項按鈕 =====
-func create_choice_button(choice):
-	# 創建新按鈕
-	var button = Button.new()
-	button.text = choice["text"]
-	button.custom_minimum_size = Vector2(0, CHOICE_BUTTON_HEIGHT)
-	
-	# 當按鈕被點擊時，執行選項被選擇的函式
-	button.pressed.connect(_on_choice_selected.bind(choice))
-	
-	# 將按鈕加到選項容器中
-	$UIRoot/ChoicePanel/ChoiceContainer.add_child(button)
-
-# ===== 當選項被選擇時 =====
-func _on_choice_selected(choice):
-	print("玩家選擇了：" + choice["text"])
-	
-	# 隱藏選項面板
-	$UIRoot/ChoicePanel.visible = false
-	
-	# 讓主角說出選擇的內容
-	var player_dialogue = {
-		"character": "我",
-		"text": choice["text"]
-	}
-	
-	# 決定接下來要顯示什麼
-	if choice.has("next_ending"):
-		# 如果是結局，先讓主角說話，然後顯示結局
-		handle_ending_choice(player_dialogue, choice)
-	elif choice.has("next_dialogue"):
-		# 如果是繼續對話，先讓主角說話，然後繼續對話
-		handle_dialogue_choice(player_dialogue, choice)
+# ===== 創建選項回調函數 =====
+func create_choice_callback(choice: Dictionary) -> Callable:
+	return func():
+		# 讓主角說出選擇的內容
+		var player_character = get_or_create_character("我")
+		player_character.says(choice["text"])
+		
+		# 決定接下來要顯示什麼
+		if choice.has("next_ending"):
+			await handle_ending_choice(choice)
+		elif choice.has("next_dialogue"):
+			await handle_dialogue_choice(choice)
 
 # ===== 處理結局選項 =====
-func handle_ending_choice(player_dialogue, choice):
+func handle_ending_choice(choice: Dictionary):
 	if endings.has(choice["next_ending"]):
 		var ending_data = endings[choice["next_ending"]]
 		var ending_dialogue = {
@@ -261,55 +266,90 @@ func handle_ending_choice(player_dialogue, choice):
 			"ending_text": ending_data["ending_text"],
 			"background": ending_data["background"]
 		}
-		
-		# 組合對話：主角說話 + 結局
-		current_dialogue = [player_dialogue, ending_dialogue]
-		current_index = 0
-		show_current_dialogue()
+		await show_ending(ending_dialogue)
 
 # ===== 處理對話選項 =====
-func handle_dialogue_choice(player_dialogue, choice):
+func handle_dialogue_choice(choice: Dictionary):
 	if dialogue_routes.has(choice["next_dialogue"]):
-		# 組合對話：主角說話 + 新的對話路線
-		current_dialogue = [player_dialogue] + dialogue_routes[choice["next_dialogue"]]
-		current_index = 0
-		show_current_dialogue()
+		await execute_dialogue_sequence(dialogue_routes[choice["next_dialogue"]])
+
+# ===== 顯示結局 =====
+func show_ending(ending_data: Dictionary):
+	print("顯示結局")
+	
+	# 隱藏角色
+	$UIRoot/CharacterSprite.visible = false
+	
+	# 更換結局背景
+	if ending_data.has("background"):
+		change_background(ending_data["background"])
+	
+	# 顯示結局文字 - 使用樹狀結構方式
+	scripted.register(VNTree.DialogText.new(scripted.NO_CHAR, ending_data["ending_text"]))
+	
+	# 設定半透明效果
+	scripted.register(VNTree.Opacity.new(0.8))
+	
+	# 等待2秒後顯示重新開始按鈕
+	scripted.register(VNTree.WaitTime.new(false, 2.0))
+	scripted.register(VNTree.Jump.new(show_restart_button, []))
+
+# ===== 顯示重新開始按鈕 =====
+func show_restart_button():
+	$UIRoot/RestartButton.visible = true
+	game_running = false
+
+# ===== 更換角色圖片 =====
+func change_character_image(image_path: String):
+	var texture = load(image_path)
+	if texture:
+		$UIRoot/CharacterSprite.texture = texture
+		print("更換角色圖片：" + image_path)
+
+# ===== 更換背景圖片 =====
+func change_background(image_path: String):
+	var texture = load(image_path)
+	if texture:
+		$UIRoot/Background.texture = texture
+		print("更換背景：" + image_path)
 
 # ===== 重新開始按鈕被點擊 =====
 func _on_restart_button_pressed():
 	print("重新開始按鈕被點擊")
 	restart_game()
 
+# ===== 對話確認事件 =====
+func _on_dialogue_confirm():
+	# 這個函數會在滑鼠點擊時被呼叫
+	# dokivn系統會自動處理對話推進，這裡可以加入額外的邏輯
+	print("對話確認 - 滑鼠點擊")
+
 # ===== 處理玩家輸入（滑鼠點擊） =====
 func _input(event):
-	# 檢查是否為滑鼠左鍵點擊
-	if event is InputEventMouseButton:
+	# 檢查是否為滑鼠左鍵點擊且遊戲正在運行
+	if event is InputEventMouseButton and game_running:
 		if event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-			handle_mouse_click()
+			# 發送確認信號給dokivn系統
+			scripted.confirm.emit()
 
-# ===== 處理滑鼠點擊 =====
-func handle_mouse_click():
-	# 如果選項面板正在顯示，就不要進行下一段對話
-	if $UIRoot/ChoicePanel.visible:
+# ===== 更新顯示 =====
+func _process(_delta):
+	if not game_running or not scripted:
 		return
 	
-	# 如果正在打字，點擊可以加速
-	if is_typing:
-		typewriter_speed = fast_typewriter_speed
-		skip_typewriter = true
-		print("加速打字")
-	else:
-		# 恢復正常打字速度，進入下一句對話
-		typewriter_speed = 0.08
-		next_dialogue()
-
-# ===== 進入下一句對話 =====
-func next_dialogue():
-	print("進入下一句對話")
-	current_index += 1
+	# 更新對話文字
+	$UIRoot/DialoguePanel/DialogueText.text = scripted.text_output
+	$UIRoot/DialoguePanel/DialogueText.visible_ratio = scripted.vrat_output
 	
-	# 檢查是否還有對話
-	if current_index < len(current_dialogue):
-		show_current_dialogue()
+	# 更新角色名字
+	var current_char = scripted.get_character()
+	if current_char:
+		$UIRoot/DialoguePanel/CharacterName.text = current_char.attr_name
+		$UIRoot/DialoguePanel/CharacterName.modulate = current_char.attr_color
 	else:
-		print("這個對話路線結束了")
+		$UIRoot/DialoguePanel/CharacterName.text = ""
+		$UIRoot/DialoguePanel/CharacterName.modulate = Color.WHITE
+	
+	# 更新透明度
+	$UIRoot/DialoguePanel.modulate.a = scripted.opacity_output
+	$UIRoot/DialoguePanel/CharacterName.modulate.a = scripted.opacity_output
